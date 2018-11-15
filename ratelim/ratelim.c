@@ -9,28 +9,36 @@
 static void* observe(void *arg)
 {
 	/* ... do some observing ... */
-	log("\"message\":\"loading\"");
+	logDebug("\"message\":\"observe\"");
 
 	return NULL;
 }
 
 static int load(struct kr_module *module, const char *path)
 {
+	logDebug("\"message\":\"load\"");
+
 	return kr_ok();
 }
 
 static int consume(kr_layer_t *ctx, knot_pkt_t *pkt)
 {
+	logDebug("\"message\":\"consume\"");
+
 	return ctx->state;
 }
 
 static int produce(kr_layer_t *ctx, knot_pkt_t *pkt)
 {
+	logDebug("\"message\":\"produce\"");
+
 	return ctx->state;
 }
 
 static int finish(kr_layer_t *ctx)
 {
+	logDebug("\"message\":\"finish\"");
+
 	return ctx->state;
 }
 
@@ -40,13 +48,16 @@ KR_EXPORT const kr_layer_api_t *rank_layer(struct kr_module *module) {
 			.produce = &produce,
 			.finish = &finish,
 	};
-	/* Store module reference */
+	logDebug("\"message\":\"rank_layer\"");
+
 	_layer.data = module;
 	return &_layer;
 }
 
 KR_EXPORT int ratelim_init(struct kr_module *module)
 {
+	logDebug("\"message\":\"init\"");
+
 	pthread_t thr_id;
 	int err = 0;
 
@@ -61,6 +72,8 @@ KR_EXPORT int ratelim_init(struct kr_module *module)
 
 KR_EXPORT int ratelim_deinit(struct kr_module *module)
 {
+	logDebug("\"message\":\"deinit\"");
+
 	int err = 0;
 	if ((err = destroy()) != 0)
 		return kr_error(err);
