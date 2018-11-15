@@ -4,6 +4,7 @@
 #define C_MOD_RATELIM "\x07""ratelim"
 
 #include "main.h"
+#include "ratelim.h"
 
 static void* observe(void *arg)
 {
