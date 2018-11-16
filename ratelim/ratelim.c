@@ -1,5 +1,6 @@
 #define C_MOD_RATELIM "\x07""ratelim"
 
+#include "log.h"
 #include "main.h"
 #include "ratelim.h"
 
