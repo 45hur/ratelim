@@ -9,9 +9,7 @@
 #define C_MOD_MUTEX "mutex.ratelim.kres.module\0"
 #define C_MOD_LOGFILE "/var/log/whalebone/ratelim.log\0"
 
-void debugLog(char *text);
-
-void debugLog(char *text)
+static __inline void debugLog(char *text)
 {
 	pthread_mutex_lock(&(thread_shared->mutex));
 
