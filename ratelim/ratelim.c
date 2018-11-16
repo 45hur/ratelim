@@ -62,7 +62,7 @@ KR_EXPORT int ratelim_init(struct kr_module *module)
 
 KR_EXPORT int ratelim_deinit(struct kr_module *module)
 {
-	logDebug("\"message\":\"deinit\"");
+	//logDebug("\"message\":\"deinit\"");
 
 	int err = 0;
 	if ((err = destroy()) != 0)
