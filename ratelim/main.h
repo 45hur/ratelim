@@ -4,9 +4,12 @@
 #define C_MOD_MUTEX "mutex.ratelim.kres.module\0"
 #define C_MOD_LOGFILE "/var/log/whalebone/ratelim.log\0"
 
-#include <stdio.h>
 #include <fcntl.h>
 #include <pthread.h>
+#include <stdio.h>
+#include <string.h>
+#include <unistd.h>
+
 #include <sys/mman.h>
 #include <sys/stat.h>
 #include <sys/types.h>
