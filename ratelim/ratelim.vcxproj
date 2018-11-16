@@ -77,6 +77,7 @@
     <RemoteCppCompileToolExe>gcc</RemoteCppCompileToolExe>
   </PropertyGroup>
   <ItemGroup>
+    <ClCompile Include="log.c" />
     <ClCompile Include="main.c" />
     <ClCompile Include="ratelim.c" />
   </ItemGroup>
@@ -89,8 +90,12 @@
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
       <PreprocessorDefinitions>NOKRES</PreprocessorDefinitions>
-      <RuntimeTypeInfo>false</RuntimeTypeInfo>
-      <ThreadSafeStatics>No</ThreadSafeStatics>
+      <RuntimeTypeInfo>
+      </RuntimeTypeInfo>
+      <ThreadSafeStatics>
+      </ThreadSafeStatics>
+      <CLanguageStandard>c11</CLanguageStandard>
+      <CompileAs>CompileAsC</CompileAs>
     </ClCompile>
     <Link>
       <LibraryDependencies>pthread;rt</LibraryDependencies>
@@ -100,8 +105,11 @@
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x86'">
     <ClCompile>
       <PreprocessorDefinitions>NOKRES</PreprocessorDefinitions>
-      <ThreadSafeStatics>No</ThreadSafeStatics>
-      <RuntimeTypeInfo>false</RuntimeTypeInfo>
+      <ThreadSafeStatics>
+      </ThreadSafeStatics>
+      <RuntimeTypeInfo>
+      </RuntimeTypeInfo>
+      <CompileAs>CompileAsC</CompileAs>
     </ClCompile>
     <Link>
       <LibraryDependencies>pthread;rt</LibraryDependencies>
@@ -110,8 +118,11 @@
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x86'">
     <ClCompile>
       <PreprocessorDefinitions>NOKRES;NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <RuntimeTypeInfo>false</RuntimeTypeInfo>
-      <ThreadSafeStatics>No</ThreadSafeStatics>
+      <RuntimeTypeInfo>
+      </RuntimeTypeInfo>
+      <ThreadSafeStatics>
+      </ThreadSafeStatics>
+      <CompileAs>CompileAsC</CompileAs>
     </ClCompile>
     <Link>
       <LibraryDependencies>pthread;rt</LibraryDependencies>
@@ -120,8 +131,12 @@
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
       <PreprocessorDefinitions>NOKRES;NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <RuntimeTypeInfo>false</RuntimeTypeInfo>
-      <ThreadSafeStatics>No</ThreadSafeStatics>
+      <RuntimeTypeInfo>
+      </RuntimeTypeInfo>
+      <ThreadSafeStatics>
+      </ThreadSafeStatics>
+      <CLanguageStandard>c11</CLanguageStandard>
+      <CompileAs>CompileAsC</CompileAs>
     </ClCompile>
     <Link>
       <LibraryDependencies>pthread;rt</LibraryDependencies>

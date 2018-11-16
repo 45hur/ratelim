@@ -1,9 +1,6 @@
 #ifndef RATELIM_MAIN_H
 #define RATELIM_MAIN_H
 
-#define C_MOD_MUTEX "mutex.ratelim.kres.module\0"
-#define C_MOD_LOGFILE "/var/log/whalebone/ratelim.log\0"
-
 #include <fcntl.h>
 #include <pthread.h>
 #include <stdio.h>
@@ -21,5 +18,7 @@ int create();
 int destroy();
 int usage();
 int userInput();
+
+int ftruncate(int fd, off_t length);
 
 #endif
