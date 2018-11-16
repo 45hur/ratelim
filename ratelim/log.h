@@ -3,7 +3,7 @@
 
 #include <stdio.h>
 
-static void debugLog(char *text)
+static __inline void debugLog(char *text)
 {
 	pthread_mutex_lock(&(thread_shared->mutex));
 
