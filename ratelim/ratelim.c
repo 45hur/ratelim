@@ -1,10 +1,11 @@
-#ifndef NOKRES
-
-/* Convenience macro to declare module API. */
 #define C_MOD_RATELIM "\x07""ratelim"
 
 #include "main.h"
 #include "ratelim.h"
+
+#ifndef NOKRES
+
+/* Convenience macro to declare module API. */
 
 static void* observe(void *arg)
 {
@@ -90,4 +91,27 @@ KR_EXPORT int ratelim_deinit(struct kr_module *module)
 
 KR_MODULE_EXPORT(ratelim)
 
+#endif
+
+#ifdef NOKRES
+int main()
+{
+	int err = 0;
+	if ((err = create()) != 0)
+	{
+		debugLog("error in create()");
+		return err;
+	}
+
+	usage();
+	while (userInput());
+
+	if ((err = destroy()) != 0)
+	{
+		debugLog("error in destroy()");
+		return err;
+	}
+
+	return err;
+}
 #endif

@@ -77,8 +77,6 @@
     <RemoteCppCompileToolExe>gcc</RemoteCppCompileToolExe>
   </PropertyGroup>
   <ItemGroup>
-    <ClCompile Include="log.c" />
-    <ClCompile Include="main.c" />
     <ClCompile Include="ratelim.c" />
   </ItemGroup>
   <ItemGroup>
