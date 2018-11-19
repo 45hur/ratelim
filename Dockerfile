@@ -1,41 +1,78 @@
-FROM alpine:edge
+# Intermediate container for Knot DNS build (not persistent)
+FROM debian:stable AS knot-dns-build
+ARG KNOT_DNS_VERSION=v2.7.2
+
+# Build dependencies
+ENV KNOT_DNS_BUILD_DEPS git-core build-essential libtool autoconf pkg-config \
+	libgnutls28-dev	libprotobuf-dev libprotobuf-c-dev libfstrm-dev
+ENV KNOT_RESOLVER_BUILD_DEPS build-essential pkg-config bsdmainutils liblmdb-dev \
+	libluajit-5.1-dev libuv1-dev libprotobuf-dev libprotobuf-c-dev \
+	libfstrm-dev luajit lua-sec lua-socket
+ENV BUILDENV_DEPS ${KNOT_DNS_BUILD_DEPS} ${KNOT_RESOLVER_BUILD_DEPS}
+RUN apt-get update -qq && \
+	apt-get -y -qqq install ${BUILDENV_DEPS}
+
+# Install Knot DNS from sources
+RUN git clone -b $KNOT_DNS_VERSION --depth=1 https://gitlab.labs.nic.cz/knot/knot-dns.git /tmp/knot-dns && \
+	cd /tmp/knot-dns && \
+	autoreconf -if && \
+	./configure --disable-static --disable-fastparser --disable-documentation \
+		--disable-daemon --disable-utilities --with-lmdb=no && \
+	make -j4 install && \
+	ldconfig
+
+# Copy libknot, libdnssec, libzscanner to runtime
+RUN mkdir -p /tmp/root/usr/local/include /tmp/root/usr/local/lib /tmp/root/usr/local/lib/pkgconfig && \
+	cp -rt /tmp/root/usr/local/include /usr/local/include/libknot /usr/local/include/libdnssec /usr/local/include/libzscanner && \
+	cp -rt /tmp/root/usr/local/lib /usr/local/lib/libknot* /usr/local/lib/libdnssec* /usr/local/lib/libzscanner* && \
+	cp -rt /tmp/root/usr/local/lib/pkgconfig /usr/local/lib/pkgconfig/libknot.pc /usr/local/lib/pkgconfig/libdnssec.pc /usr/local/lib/pkgconfig/libzscanner.pc
+
+
+# Intermediate container with runtime dependencies
+FROM debian:stable-slim AS runtime
+
+# Install runtime dependencies
+ENV KNOT_DNS_RUNTIME_DEPS libgnutls30
+ENV KNOT_RESOLVER_RUNTIME_DEPS liblmdb0 luajit libluajit-5.1-2 libuv1 lua-sec lua-socket
+ENV KNOT_RESOLVER_RUNTIME_DEPS_HTTP libjs-bootstrap libjs-d3 libjs-jquery lua-http lua-mmdb
+ENV KNOT_RESOLVER_RUNTIME_DEPS_EXTRA libfstrm0 lua-cqueues
+ENV RUNTIME_DEPS ${KNOT_DNS_RUNTIME_DEPS} ${KNOT_RESOLVER_RUNTIME_DEPS} ${KNOT_RESOLVER_RUNTIME_DEPS_HTTP} ${KNOT_RESOLVER_RUNTIME_DEPS_EXTRA}
+RUN apt-get update -qq && \
+	apt-get install -y -qqq ${RUNTIME_DEPS} && \
+	apt-get clean && \
+	rm -rf /var/lib/apt/lists/*
+
+
+# Intermediate container for Knot Resolver build
+FROM knot-dns-build AS build
+
+# Clone knot-resolver sources
+RUN git clone https://gitlab.labs.nic.cz/knot/knot-resolver.git /tmp/knot-resolver && \
+	git submodule update --init && \
+	git clone https://github.com/Elctro/ratelim.git /tmp/knot-resolver/modules && \
+	cd /tmp/knot-resolver/modules && \
+	patch -i modules.mk.patch modules.mk && \
+
+# Build Knot Resolver
+ARG CFLAGS="-O2 -fstack-protector -g"
+ENV LDFLAGS -Wl,--as-needed
+RUN cd /tmp/knot-resolver && \
+	make "-j$(nproc)" && \
+	make install DESTDIR=/tmp/root && \
+	mkdir -p /tmp/root/etc/knot-resolver && \
+	cp ./etc/config.docker /tmp/root/etc/knot-resolver/kresd.conf && \
+	cp ./distro/common/root.keys /tmp/root/etc/knot-resolver/
+
+
+# Final container
+FROM runtime
 MAINTAINER Knot Resolver team <knot-resolver-users@lists.nic.cz>
 
-# Environment
-ENV BUILD_PKGS build-base automake autoconf libtool pkgconfig git luajit-dev libuv-dev gnutls-dev jansson-dev userspace-rcu-dev curl vim bsd-compat-headers patch
-ENV RUN_PKGS luajit libuv gnutls jansson bash libstdc++ lua5.1-cqueues lua5.1-http lua5.1-sec lua5.1-socket
-ENV BUILD_IGNORE gmp nettle jansson gnutls lua libuv cmocka
-ENV PKG_CONFIG_PATH /usr/local/lib/pkgconfig
-ENV CFLAGS -O2 -ftree-vectorize -fstack-protector -g
-ENV LDFLAGS -Wl,--as-needed
-
-# Expose port
+# Export DNS over UDP & TCP, DNS-over-TLS, web interface
 EXPOSE 53/UDP 53/TCP 853/TCP 8053/TCP
 
-# Select entrypoint
-WORKDIR /data
-COPY "config.docker" "/data"
-#COPY "root.keys" "/data"
+CMD ["/usr/local/sbin/kresd", "-c", "/etc/knot-resolver/kresd.conf"]
 
-#COPY "hashtable.dump" "/data"
-CMD ["/usr/local/sbin/kresd", "-f", "2", "-c", "/data/config.docker"]
-
-# Install dependencies and sources
-RUN apk -U upgrade && apk add -t lua5.1-compat5.3 lua5.1-compat53 && \
-apk --update add ${RUN_PKGS} && \
-apk add --virtual build-dep ${BUILD_PKGS} && \
-git clone -b 2.6 https://github.com/CZ-NIC/knot.git /tmp/dns && \
-git clone -b 2.4 --depth 1 --recurse-submodules=modules/policy/lua-aho-corasick \
-https://gitlab.labs.nic.cz/knot/knot-resolver.git /tmp/build && \
-git clone https://github.com/Elctro/ratelim.git /tmp/ratelim && \
-cp -a /tmp/ratelim/. /tmp/build/modules/ && \
-cp -a /tmp/dns/src/knot/. /tmp/build/knot/ && \
-cd /tmp/build/modules && \
-patch -i modules.mk.patch modules.mk && \
-cd /tmp/build && \
-./scripts/bootstrap-depends.sh /usr/local && \
-make -j4 install && \
-# Trim down the image
-cd / && \
-apk del --purge build-dep && \
-rm -rf /var/cache/apk/* /tmp/build
+# Fetch Knot Resolver + Knot DNS libraries from build image
+COPY --from=build /tmp/root/ /
+RUN ldconfig
