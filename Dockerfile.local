@@ -75,12 +75,12 @@ FROM runtime
 MAINTAINER Knot Resolver team <knot-resolver-users@lists.nic.cz>
 
 RUN mkdir /var/log/whalebone
-COPY ./config.docker /etc/knot-resolver/
+COPY config.docker ./etc/knot-resolver/kresd.conf
 
 # Export DNS over UDP & TCP, DNS-over-TLS, web interface
 EXPOSE 53/UDP 53/TCP 853/TCP 8053/TCP
 
-CMD ["/usr/local/sbin/kresd", "-c", "/etc/knot-resolver/config.docker"]
+CMD ["/usr/local/sbin/kresd", "-c", "/etc/knot-resolver/kresd.conf"]
 
 # Fetch Knot Resolver + Knot DNS libraries from build image
 COPY --from=build /tmp/root/ /

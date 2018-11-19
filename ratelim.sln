@@ -5,6 +5,16 @@ VisualStudioVersion = 15.0.27703.2026
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ratelim", "ratelim\ratelim.vcxproj", "{0E1ECFF2-915E-48FB-AF19-4CAFEDAC8EBE}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{77AD7B84-B6FD-4EF7-8868-300A73DCF7E0}"
+	ProjectSection(SolutionItems) = preProject
+		config.docker = config.docker
+		Dockerfile = Dockerfile
+		Dockerfile.git = Dockerfile.git
+		Dockerfile.local = Dockerfile.local
+		modules.mk.patch = modules.mk.patch
+		modules.mk.patched201801 = modules.mk.patched201801
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|ARM = Debug|ARM
