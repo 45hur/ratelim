@@ -39,7 +39,7 @@ static void debugLog(const char *format, ...)
 	strftime(timebuf, 26, "%Y/%m/%d %H:%M:%S", timeinfo);
 	sprintf(message, "{\"timestamp\":\"%s\",%s}\n", timebuf, text);
 
-	fprint(stdout, message);
+	fprintf(stdout, "%s", message);
 
 	if (fh == 0)
 	{

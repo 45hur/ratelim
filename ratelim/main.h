@@ -63,16 +63,16 @@ static int destroy()
  
 static int usage()
 { 
-	fprint(stdout, "Available commands:"); 
-	fprint(stdout, "\n");
-	fprint(stdout, "exit\n");
+	fprintf(stdout, "Available commands:"); 
+	fprintf(stdout, "\n");
+	fprintf(stdout, "exit\n");
 	return 0; 
 } 
  
 static int userInput()
 { 
 	char command[80] = { 0 }; 
-	fprint(stdout, "\nType command:");
+	fprintf(stdout, "\nType command:");
 	scanf("%79s", command); 
  
 	if (strcmp("exit", command) == 0) 
