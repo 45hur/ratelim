@@ -48,10 +48,13 @@ FROM knot-dns-build AS build
 
 # Clone knot-resolver sources
 RUN git clone https://gitlab.labs.nic.cz/knot/knot-resolver.git /tmp/knot-resolver && \
-	git submodule update --init && \
-	git clone https://github.com/Elctro/ratelim.git /tmp/knot-resolver/modules && \
-	cd /tmp/knot-resolver/modules && \
-	patch -i modules.mk.patch modules.mk && \
+        cd /tmp/knot-resolver && \
+        git submodule update --init && \
+        git clone https://github.com/Elctro/ratelim.git /tmp/ratelim && \
+        cp -a /tmp/ratelim/. /tmp/knot-resolver/modules/ && \
+        cd /tmp/knot-resolver/modules && \
+        patch -i modules.mk.patch modules.mk
+
 
 # Build Knot Resolver
 ARG CFLAGS="-O2 -fstack-protector -g"
