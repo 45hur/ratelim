@@ -70,7 +70,7 @@ int ratelim_init(struct kr_module *module)
 
 	module->data = (void *)thr_id;
 
-	return err;
+	return kr_ok();
 }
 
 KR_EXPORT 
