@@ -6,35 +6,35 @@
 
 #ifndef NOKRES
 
-static void* observe(void *arg)
+void* observe(void *arg)
 {
 	debugLog("\"%s\":\"%s\"", "message", "observe");
 
 	return NULL;
 }
 
-static int load(struct kr_module *module, const char *path)
+int begin(kr_layer_t *ctx)
 {
-	debugLog("\"%s\":\"%s\"", "message", "load");
+	debugLog("\"%s\":\"%s\"", "message", "begin");
 
-	return kr_ok();
+	return ctx->state;
 }
 
-static int consume(kr_layer_t *ctx, knot_pkt_t *pkt)
+int consume(kr_layer_t *ctx, knot_pkt_t *pkt)
 {
 	debugLog("\"%s\":\"%s\"", "message", "consume");
 
 	return ctx->state;
 }
 
-static int produce(kr_layer_t *ctx, knot_pkt_t *pkt)
+int produce(kr_layer_t *ctx, knot_pkt_t *pkt)
 {
 	debugLog("\"%s\":\"%s\"", "message", "produce");
 
 	return ctx->state;
 }
 
-static int finish(kr_layer_t *ctx)
+int finish(kr_layer_t *ctx)
 {
 	debugLog("\"%s\":\"%s\"", "message", "finish");
 
@@ -44,6 +44,7 @@ static int finish(kr_layer_t *ctx)
 KR_EXPORT 
 const kr_layer_api_t *rank_layer(struct kr_module *module) {
 	static kr_layer_api_t _layer = {
+			.begin = &begin,
 			.consume = &consume,
 			.produce = &produce,
 			.finish = &finish,
