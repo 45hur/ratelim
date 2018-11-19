@@ -42,7 +42,7 @@ int finish(kr_layer_t *ctx)
 }
 
 KR_EXPORT 
-const kr_layer_api_t *rank_layer(struct kr_module *module) {
+const kr_layer_api_t *ratelim_layer(struct kr_module *module) {
 	static kr_layer_api_t _layer = {
 			.begin = &begin,
 			.consume = &consume,
