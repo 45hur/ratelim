@@ -1,36 +1,9 @@
-#pragma once
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 
 #include "crc64.h"
-#include "stdio.h"
-
-typedef struct
-{
-	uint64_t checksum;
-	uint64_t counter;
-	char name[16];
-} crc64_vector_item;
-
-typedef struct
-{
-	crc64_vector_item *items;
-	unsigned int capacity;
-	unsigned int count;
-} crc64_vector;
-
-crc64_vector *vector;
-
-int vectorIncrement(char *address)
-{
-	crc64_vector_item *item = NULL;
-	if (vectorContains(address, &item))
-	{
-		item->counter++;
-
-		return 0;
-	} 
-
-	return vectorAdd(address);
-}
+#include "vector.h"
 
 int createVector(unsigned int capacity)
 {
@@ -58,12 +31,12 @@ int destroyVector()
 
 int vectorAdd(const char *address)
 {
-	crc64_vector_item *item;
-	if (vectorContains(address, item) == 0)
+	crc64_vector_item *item = NULL;
+	if (vectorContains(address, &item) == 0)
 	{
 		unsigned long long crc = crc64(0, (const unsigned char*)address, strlen(address));
 		vector->items[vector->count].checksum = crc;
-		memcpy(&vector->items[vector->count].name, address, strlen(address)); 
+		memcpy(&vector->items[vector->count].name, address, strlen(address));
 		vector->count++;
 
 		vectorSort();
@@ -74,48 +47,12 @@ int vectorAdd(const char *address)
 	return -1;
 }
 
-int vectorPrint()
-{
-	for (int i = 0; i < vector->count; i++)
-	{
-		fprintf(stdout, "%s\t%lx\t%ld\n", vector->items[i].name, vector->items[i].checksum, vector->items[i].counter);
-	}
-
-	return 0;
-}
-
-int vectorCompare(const void * a, const void * b)
-{
-	const crc64_vector_item ai = *(const crc64_vector_item*)a;
-	const crc64_vector_item bi = *(const crc64_vector_item*)b;
-
-	if (ai.checksum < bi.checksum)
-	{
-		return -1;
-	}
-	else if (ai.checksum > bi.checksum)
-	{
-		return 1;
-	}
-	else
-	{
-		return 0;
-	}
-}
-
-
-void vectorSort()
-{
-	qsort(vector->items, vector->count, sizeof(crc64_vector_item), vectorCompare);
-}
-
-
-int vectorContains(const unsigned char *address, crc64_vector_item **found)
+int vectorContains(const char *address, crc64_vector_item **found)
 {
 	if (!vector)
 		return -1;
 
-	unsigned long long crc = crc64(0, address, strlen(address));
+	unsigned long long crc = crc64(0, address, strlen((const char*)address));
 
 	unsigned int lowerbound = 0;
 	unsigned int upperbound = vector->count;
@@ -163,3 +100,51 @@ int vectorContains(const unsigned char *address, crc64_vector_item **found)
 	return (lowerbound <= upperbound);
 }
 
+int vectorCompare(const void * a, const void * b)
+{
+	const crc64_vector_item ai = *(const crc64_vector_item*)a;
+	const crc64_vector_item bi = *(const crc64_vector_item*)b;
+
+	if (ai.checksum < bi.checksum)
+	{
+		return -1;
+	}
+	else if (ai.checksum > bi.checksum)
+	{
+		return 1;
+	}
+	else
+	{
+		return 0;
+	}
+}
+
+int vectorIncrement(char *address)
+{
+	crc64_vector_item *item = NULL;
+	if (vectorContains(address, &item))
+	{
+		item->counter++;
+
+		return 0;
+	}
+
+	return vectorAdd(address);
+}
+
+int vectorPrint()
+{
+	for (int i = 0; i < vector->count; i++)
+	{
+		fprintf(stdout, "%s\t%lx\t%ld\n", vector->items[i].name, vector->items[i].checksum, vector->items[i].counter);
+	}
+
+	return 0;
+}
+
+int vectorSort()
+{
+	qsort(vector->items, vector->count, sizeof(crc64_vector_item), vectorCompare);
+
+	return 0;
+}

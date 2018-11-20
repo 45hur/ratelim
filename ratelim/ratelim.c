@@ -6,14 +6,22 @@
 
 #ifndef NOKRES
 
-void* observe(void *arg)
-{
-	debugLog("\"%s\":\"%s\"", "message", "observe");
+#include <arpa/inet.h>
 
-	while (true)
+bool loop = false;
+
+void* threadproc(void *arg)
+{
+	debugLog("\"%s\":\"%s\"", "message", "threadproc");
+	int i = 0;
+	while (loop)
 	{
-		vectorPrint();
-		sleep(10000);
+		i++;
+		if (i % 10)
+		{
+			vectorPrint();
+		}
+		sleep(1);
 	}
 
 	return NULL;
@@ -112,6 +120,7 @@ KR_EXPORT
 int ratelim_init(struct kr_module *module)
 {
 	create();
+	loop = true;
 
 	pthread_t thr_id;
 	int err = 0;
@@ -119,7 +128,7 @@ int ratelim_init(struct kr_module *module)
 	if ((err = create()) != 0)
 		return kr_error(err);
 
-	if ((err = pthread_create(&thr_id, NULL, &observe, NULL)) != 0)
+	if ((err = pthread_create(&thr_id, NULL, &threadproc, NULL)) != 0)
 		return kr_error(err);
 
 	module->data = (void *)thr_id;
@@ -130,6 +139,8 @@ int ratelim_init(struct kr_module *module)
 KR_EXPORT 
 int ratelim_deinit(struct kr_module *module)
 {
+	loop = false;
+
 	int err = 0;
 	if ((err = destroy()) != 0)
 		return kr_error(err);

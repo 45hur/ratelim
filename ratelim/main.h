@@ -12,7 +12,7 @@
  
 #include "log.h"
 #include "thread_shared.h" 
-#include "counter.h"
+#include "vector.h"
  
 int ftruncate(int fd, off_t length); 
  

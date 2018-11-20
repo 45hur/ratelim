@@ -79,14 +79,18 @@
   <ItemGroup>
     <ClCompile Include="log.c" />
     <ClCompile Include="ratelim.c" />
+    <ClCompile Include="vector.c" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="counter.h" />
+    <ClInclude Include="vector.h" />
     <ClInclude Include="crc64.h" />
     <ClInclude Include="log.h" />
     <ClInclude Include="main.h" />
     <ClInclude Include="ratelim.h" />
     <ClInclude Include="thread_shared.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="ratelim.mk" />
   </ItemGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
