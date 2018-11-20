@@ -1,5 +1,4 @@
-#ifndef RATELIM_MAIN_H 
-#define RATELIM_MAIN_H 
+#pragma once
  
 #include <fcntl.h> 
 #include <pthread.h> 
@@ -13,6 +12,7 @@
  
 #include "log.h"
 #include "thread_shared.h" 
+#include "counter.h"
  
 int ftruncate(int fd, off_t length); 
  
@@ -42,6 +42,8 @@ static int create()
 	if ((err = pthread_mutex_init(&(thread_shared->mutex), &shared)) != 0) 
 		return err; 
  
+	createVector(100000);
+
 	debugLog("\"%s\":\"%s\"", "message", "created");
 
 	return err; 
@@ -55,6 +57,8 @@ static int destroy()
  
 	if ((err = shm_unlink(C_MOD_MUTEX)) == 0) 
 		return err; 
+
+	destroyVector();
  
 	debugLog("\"%s\":\"%s\"", "message", "destroyed");
 
@@ -63,11 +67,61 @@ static int destroy()
  
 static int usage()
 { 
-	fprintf(stdout, "Available commands:"); 
+	fprintf(stdout, "Available commands: "); 
 	fprintf(stdout, "\n");
 	fprintf(stdout, "exit\n");
+	fprintf(stdout, "increment\n");
+	fprintf(stdout, "insert\n");
+	fprintf(stdout, "print\n");
 	return 0; 
 } 
+
+static int increment()
+{
+	int err = 0;
+	char command[80] = { 0 };
+	fprintf(stdout, "\nEnter ip address: ");
+	scanf("%79s", command);
+
+	if ((err = vectorIncrement(command)) == 0)
+	{
+		fprintf(stdout, "\nAddress %s incremented.", command);
+	}
+	else
+	{
+		fprintf(stdout, "\nAddress %s not incremented.", command);
+	}
+
+	return err;
+}
+
+static int insert()
+{
+	int err = 0;
+	char command[80] = { 0 };
+	fprintf(stdout, "\nEnter ip address: ");
+	scanf("%79s", command);
+
+	if ((err = vectorAdd(command)) == 0)
+	{
+		fprintf(stdout, "\nAddress %s added.", command);
+	}
+	else
+	{
+		fprintf(stdout, "\nAddress %s not added.", command);
+	}
+
+	return err;
+}
+
+static int print()
+{
+	int err = 0;
+
+	vectorPrint();
+
+	return err;
+}
  
 static int userInput()
 { 
@@ -75,10 +129,16 @@ static int userInput()
 	fprintf(stdout, "\nType command:");
 	scanf("%79s", command); 
  
-	if (strcmp("exit", command) == 0) 
-		return 0; 
-	else 
-		usage(); 
+	if (strcmp("exit", command) == 0)
+		return 0;
+	else if (strcmp("increment", command) == 0)
+		increment();
+	else if (strcmp("insert", command) == 0)
+		insert();
+	else if (strcmp("print", command) == 0)
+		print();
+	else
+		usage();
  
 	return 1; 
 } 
@@ -104,7 +164,5 @@ int main()
  
     return err; 
 } 
-
-#endif
 
 #endif

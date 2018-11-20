@@ -81,6 +81,8 @@
     <ClCompile Include="ratelim.c" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="counter.h" />
+    <ClInclude Include="crc64.h" />
     <ClInclude Include="log.h" />
     <ClInclude Include="main.h" />
     <ClInclude Include="ratelim.h" />

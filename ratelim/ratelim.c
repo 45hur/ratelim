@@ -10,6 +10,12 @@ void* observe(void *arg)
 {
 	debugLog("\"%s\":\"%s\"", "message", "observe");
 
+	while (true)
+	{
+		vectorPrint();
+		sleep(10000);
+	}
+
 	return NULL;
 }
 
@@ -38,6 +44,54 @@ int finish(kr_layer_t *ctx)
 {
 	debugLog("\"%s\":\"%s\"", "message", "finish");
 
+	struct kr_request *request = (struct kr_request *)ctx->req;
+	struct kr_rplan *rplan = &request->rplan;
+
+	if (!request->qsource.addr) {
+		debugLog("\"%s\":\"%s\"", "error", "no source address");
+
+		return ctx->state;
+	}
+
+	const struct sockaddr *res = request->qsource.addr;
+	char *req_addr = NULL;
+	struct ip_addr origin = { 0 };
+	bool ipv4 = true;
+	switch (res->sa_family) 
+	{
+		case AF_INET:
+		{
+			struct sockaddr_in *addr_in = (struct sockaddr_in *)res;
+			req_addr = malloc(INET_ADDRSTRLEN);
+			inet_ntop(AF_INET, &(addr_in->sin_addr), req_addr, INET_ADDRSTRLEN);
+			origin.family = AF_INET;
+			memcpy(&origin.ipv4_sin_addr, &(addr_in->sin_addr), 4);
+			break;
+		}
+		case AF_INET6:
+		{
+			struct sockaddr_in6 *addr_in6 = (struct sockaddr_in6 *)res;
+			req_addr = malloc(INET6_ADDRSTRLEN);
+			inet_ntop(AF_INET6, &(addr_in6->sin6_addr), req_addr, INET6_ADDRSTRLEN);
+			origin.family = AF_INET6;
+			memcpy(&origin.ipv6_sin_addr, &(addr_in6->sin6_addr), 16);
+			ipv4 = false;
+			break;
+		}
+		default:
+		{
+			debugLog("\"%s\":\"%s\"", "error", "qsource invalid");
+			break;
+		}
+	}
+
+	vectorIncrement(req_addr);
+
+	if (req_addr)
+	{
+		free(req_addr);
+	}
+	
 	return ctx->state;
 }
 

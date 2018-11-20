@@ -1,5 +1,4 @@
-#ifndef RATELIM_THREAD_SHARED_H
-#define RATELIM_THREAD_SHARED_H
+#pragma once
 
 struct shared
 {
@@ -9,4 +8,9 @@ struct shared
 
 struct shared *thread_shared;
 
-#endif
+struct ip_addr
+{
+	unsigned int family;
+	unsigned int ipv4_sin_addr;
+	unsigned __int128 ipv6_sin_addr;
+};

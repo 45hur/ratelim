@@ -1,5 +1,4 @@
-#ifndef RATELIM_LOG_H
-#define RATELIM_LOG_H
+#pragma once
 
 #include <pthread.h>
 #include <stdarg.h>
@@ -59,5 +58,3 @@ static void debugLog(const char *format, ...)
 
 	pthread_mutex_unlock(&(thread_shared->mutex));
 }
-
-#endif
