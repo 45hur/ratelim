@@ -34,7 +34,7 @@ int vectorAdd(const char *address)
 	crc64_vector_item *item = NULL;
 	if (vectorContains(address, &item) == 0)
 	{
-		unsigned long long crc = crc64(0, (const unsigned char*)address, strlen(address));
+		unsigned long long crc = crc64(0, address, strlen(address));
 		vector->items[vector->count].checksum = crc;
 		memcpy(&vector->items[vector->count].name, address, strlen(address));
 		vector->count++;
