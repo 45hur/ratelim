@@ -132,11 +132,23 @@ int vectorIncrement(char *address)
 	return vectorAdd(address);
 }
 
+int vectorIsItemBlocked(char *address)
+{
+	crc64_vector_item *item = NULL;
+	if (vectorContains(address, &item))
+	{
+		if (item->counter > 100)
+			return 1;
+	}
+
+	return 0;
+}
+
 int vectorPrint()
 {
 	for (int i = 0; i < vector->count; i++)
 	{
-		fprintf(stdout, "%s\t%lx\t%ld\n", vector->items[i].name, vector->items[i].checksum, vector->items[i].counter);
+		fprintf(stdout, "%s\t%016llx\t%lld\n", vector->items[i].name, vector->items[i].checksum, vector->items[i].counter);
 	}
 
 	return 0;

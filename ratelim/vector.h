@@ -1,11 +1,10 @@
 #pragma once
 
-#include <stdint.h>
-
 typedef struct
 {
-	uint64_t checksum;
-	uint64_t counter;
+	unsigned long long checksum;
+	unsigned long long counter;
+	char blocked;
 	char name[16];
 } crc64_vector_item;
 
@@ -24,5 +23,6 @@ int vectorAdd(const char *address);
 int vectorCompare(const void * a, const void * b);
 int vectorContains(const char *address, crc64_vector_item **found);
 int vectorIncrement(char *address);
+int vectorIsItemBlocked(char *address);
 int vectorPrint();
 int vectorSort();
