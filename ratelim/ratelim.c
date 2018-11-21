@@ -86,8 +86,10 @@ int finish(kr_layer_t *ctx)
 
 	increment(address);
 
-	if (isblocked(address) == 0)
+	if (isblocked(address) == 1)
 	{
+		debugLog("\"%s\":\"%s\"", "message", "address blocked");
+
 		ctx->state = KR_STATE_FAIL;
 		return ctx->state;
 	}
