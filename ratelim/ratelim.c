@@ -109,16 +109,24 @@ int consume(kr_layer_t *ctx, knot_pkt_t *pkt)
 		return err;
 	}
 
-	if (isblocked == 1)
+	struct kr_query *qry = array_tail(rplan->pending);
+	
+	if (qry->flags.TCP)
+	{
+		if (isblocked == 1)
+		{
+			debugLog("\"%s\":\"%s\",\"%s\":\"%x\"", "debug", "consume", "isblocked-tcp", isblocked);
+
+			return KR_STATE_FAIL;
+		}
+	}
+	else if (isblocked == 1)
 	{
 		debugLog("\"%s\":\"%s\",\"%s\":\"%x\"", "debug", "consume", "isblocked", isblocked);
 
-		struct kr_query *qry = array_tail(rplan->pending);
-
-
-		return KR_STATE_FAIL;
+		qry->flags.TCP = true;
+		return KR_STATE_PRODUCE;
 	}
-	
 
 	return ctx->state;
 }

@@ -191,7 +191,7 @@ static int userInput()
 
 	if (strcmp("exit", command) == 0)
 		return 0;
-	else if (strcmp("increment", command) == 0)
+	else if (strcmp("set", command) == 0)
 		set();
 	else if (strcmp("insert", command) == 0)
 		insert();
