@@ -1,53 +1,84 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <pthread.h> 
+#include <stdio.h> 
+#include <string.h> 
+#include <unistd.h> 
+
 
 #include "crc64.h"
 #include "vector.h"
 
-int createVector(unsigned int capacity)
+int createVector(crc64_vector **vector, unsigned int capacity)
 {
-	if (vector)
+	if (*vector)
 		return -1;
 
-	vector = (crc64_vector *)malloc(sizeof(crc64_vector));
-	vector->items = (crc64_vector_item *)malloc(sizeof(crc64_vector_item) * capacity);
-	vector->capacity = capacity;
-	vector->count = 0;
+	(*vector) = (crc64_vector *)malloc(sizeof(crc64_vector));
+	(*vector)->items = (crc64_vector_item *)malloc(sizeof(crc64_vector_item) * capacity);
+	(*vector)->capacity = capacity;
+	(*vector)->count = 0;
 
 	return 0;
 }
 
-int destroyVector()
+int destroyVector(crc64_vector *vector)
 {
 	if (!vector)
 		return -1;
 
+	free(vector->items);
 	free(vector);
+
 	vector = NULL;
 
 	return 0;
 }
 
-int vectorAdd(const char *address)
+int vectorAdd(crc64_vector **vector, const char *address)
 {
 	crc64_vector_item *item = NULL;
-	if (vectorContains(address, &item) == 0)
+	int err = 0;
+	if ((err = vectorContains(*vector, address, &item)) != 0)
 	{
-		unsigned long long crc = crc64(0, address, strlen(address));
-		vector->items[vector->count].checksum = crc;
-		memcpy(&vector->items[vector->count].name, address, strlen(address));
-		vector->count++;
-
-		vectorSort();
-
-		return 0;
+		return err;
 	}
 
-	return -1;
+	if ((*vector)->count + 1 > (*vector)->capacity)
+	{
+		crc64_vector *newbuff = NULL;
+		if ((err = createVector(&newbuff, 2)) != 0)
+		{
+			return err;
+		}
+
+		crc64_vector *newvector = NULL;
+		if ((err = vectorJoin(*vector, newbuff, &newvector)) != 0)
+		{
+			destroyVector(newbuff);
+			return err;
+		}
+
+		destroyVector(newbuff);
+
+		crc64_vector *oldvector = *vector;
+		*vector = newvector;
+
+		destroyVector(oldvector);
+	}
+
+	unsigned long long crc = crc64(0, address, strlen(address));
+	(*vector)->items[(*vector)->count].checksum = crc;
+	memcpy(&(*vector)->items[(*vector)->count].name, address, strlen(address));
+	(*vector)->count++;
+
+	vectorSort((*vector));
+
+	return err;
 }
 
-int vectorContains(const char *address, crc64_vector_item **found)
+int vectorContains(crc64_vector *vector, const char *address, crc64_vector_item **found)
 {
 	if (!vector)
 		return -1;
@@ -119,42 +150,84 @@ int vectorCompare(const void * a, const void * b)
 	}
 }
 
-int vectorIncrement(char *address)
+int vectorJoin(crc64_vector *v1, crc64_vector *v2, crc64_vector **vout)
+{
+	unsigned int capacity = v1->capacity + v2->capacity;
+	crc64_vector *res = NULL;
+	int err = 0;
+
+	if ((err = createVector(&res, capacity)) != 0)
+	{
+		return err;
+	}
+
+	res->count = v1->count + v2->count;
+	size_t size = v1->count * sizeof(crc64_vector_item);
+	memcpy(res->items, v1->items, size);
+	memcpy(res->items + size, v2->items, v2->count * sizeof(crc64_vector_item));
+
+	*vout = res;
+
+	return err;
+}
+
+int vectorIncrement(crc64_vector **vector, char *address)
 {
 	crc64_vector_item *item = NULL;
-	if (vectorContains(address, &item))
+	if (vectorContains(*vector, address, &item))
 	{
 		item->counter++;
 
 		return 0;
 	}
 
-	return vectorAdd(address);
+	return vectorAdd(vector, address);
 }
 
-int vectorIsItemBlocked(char *address)
+int vectorIsItemBlocked(crc64_vector *vector, char *address)
 {
 	crc64_vector_item *item = NULL;
-	if (vectorContains(address, &item))
+	if (vectorContains(vector, address, &item))
 	{
-		if (item->counter > 100)
+		if (item->counter > 5)
+		{
 			return 1;
+		}
 	}
 
 	return 0;
 }
 
-int vectorPrint()
+int vectorPrint(crc64_vector *vector)
+{
+	fprintf(stdout, "capacity=%d\tcount=%d\n", vector->capacity, vector->count);
+
+	for (int i = 0; i < vector->count; i++)
+	{
+		fprintf(stdout, "%d.\t%s\t%llx\t%lld\n", i, vector->items[i].name, vector->items[i].checksum, vector->items[i].counter);
+	}
+
+	return 0;
+}
+
+int vectorReset(crc64_vector *vector)
 {
 	for (int i = 0; i < vector->count; i++)
 	{
-		fprintf(stdout, "%s\t%016llx\t%lld\n", vector->items[i].name, vector->items[i].checksum, vector->items[i].counter);
+		if (vector->items[i].counter < 5)
+		{
+			vector->items[i].counter = 0;
+		}
+		else
+		{
+			vector->items[i].counter--;
+		}
 	}
 
 	return 0;
 }
 
-int vectorSort()
+int vectorSort(crc64_vector *vector)
 {
 	qsort(vector->items, vector->count, sizeof(crc64_vector_item), vectorCompare);
 

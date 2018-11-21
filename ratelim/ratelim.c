@@ -1,31 +1,12 @@
 #define C_MOD_RATELIM "\x07""ratelim"
 
 #include "log.h"
-#include "main.h"
+#include "program.h"
 #include "ratelim.h"
 
 #ifndef NOKRES
 
 #include <arpa/inet.h>
-
-bool loop = false;
-
-void* threadproc(void *arg)
-{
-	debugLog("\"%s\":\"%s\"", "message", "threadproc");
-	int i = 0;
-	while (loop)
-	{
-		i++;
-		if (i % 10)
-		{
-			vectorPrint();
-		}
-		sleep(1);
-	}
-
-	return NULL;
-}
 
 int getip(struct kr_request *request, char *address)
 {
@@ -98,12 +79,18 @@ int finish(kr_layer_t *ctx)
 	char address[256] = { 0 };
 	int err = 0;
 
-	if ((err = getip(request, (char *)&address)) != 0)
+	if ((err = getip(request, (char *)address)) != 0)
 	{
 		return err;
 	}
 
-	vectorIncrement(address);
+	increment(address);
+
+	if (isblocked(address) == 0)
+	{
+		ctx->state = KR_STATE_FAIL;
+		return ctx->state;
+	}
 
 	return ctx->state;
 }
@@ -124,19 +111,14 @@ const kr_layer_api_t *ratelim_layer(struct kr_module *module) {
 KR_EXPORT 
 int ratelim_init(struct kr_module *module)
 {
-	create();
-	loop = true;
-
 	pthread_t thr_id;
 	int err = 0;
 
-	if ((err = create()) != 0)
+	void *args = NULL;
+	if ((err = create(&args)) != 0)
 		return kr_error(err);
 
-	if ((err = pthread_create(&thr_id, NULL, &threadproc, NULL)) != 0)
-		return kr_error(err);
-
-	module->data = (void *)thr_id;
+	module->data = (void *)args;
 
 	return kr_ok();
 }
@@ -144,16 +126,9 @@ int ratelim_init(struct kr_module *module)
 KR_EXPORT 
 int ratelim_deinit(struct kr_module *module)
 {
-	loop = false;
-
 	int err = 0;
-	if ((err = destroy()) != 0)
+	if ((err = destroy((void *)module->data)) != 0)
 		return kr_error(err);
-
-	void *res = NULL;
-	pthread_t thr_id = (pthread_t)module->data;
-	if ((err = pthread_join(thr_id, res)) != 0)
-		return kr_error(errno);
 
 	return kr_ok();
 }

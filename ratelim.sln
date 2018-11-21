@@ -13,6 +13,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		Dockerfile.local = Dockerfile.local
 		modules.mk.patch = modules.mk.patch
 		modules.mk.patched201801 = modules.mk.patched201801
+		ratelim\ratelim.mk = ratelim\ratelim.mk
 	EndProjectSection
 EndProject
 Global

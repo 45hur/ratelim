@@ -10,7 +10,6 @@
 #include "lib/resolve.h"
 #include "lib/rplan.h"
 
-void* threadproc(void *arg);
 int begin(kr_layer_t *ctx);
 int consume(kr_layer_t *ctx, knot_pkt_t *pkt);
 int produce(kr_layer_t *ctx, knot_pkt_t *pkt);

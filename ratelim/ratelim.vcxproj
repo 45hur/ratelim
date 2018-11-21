@@ -78,6 +78,7 @@
   </PropertyGroup>
   <ItemGroup>
     <ClCompile Include="log.c" />
+    <ClCompile Include="program.c" />
     <ClCompile Include="ratelim.c" />
     <ClCompile Include="vector.c" />
   </ItemGroup>
@@ -85,7 +86,7 @@
     <ClInclude Include="vector.h" />
     <ClInclude Include="crc64.h" />
     <ClInclude Include="log.h" />
-    <ClInclude Include="main.h" />
+    <ClInclude Include="program.h" />
     <ClInclude Include="ratelim.h" />
     <ClInclude Include="thread_shared.h" />
   </ItemGroup>
