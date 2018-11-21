@@ -60,7 +60,9 @@ int begin(kr_layer_t *ctx)
 
 	if ((err = getip(request, (char *)address)) != 0)
 	{
-		return err;
+		//return err; generates log message --- [priming] cannot resolve '.' NS, next priming query in 10 seconds
+		//we do not care about no address sources
+		return ctx->state;
 	}
 
 	if (isblocked(address) == 1)
