@@ -53,6 +53,24 @@ int begin(kr_layer_t *ctx)
 {
 	debugLog("\"%s\":\"%s\"", "message", "begin");
 
+	struct kr_request *request = (struct kr_request *)ctx->req;
+	struct kr_rplan *rplan = &request->rplan;
+	char address[256] = { 0 };
+	int err = 0;
+
+	if ((err = getip(request, (char *)address)) != 0)
+	{
+		return err;
+	}
+
+	if (isblocked(address) == 1)
+	{
+		debugLog("\"%s\":\"%s\"", "message", "address blocked");
+
+		ctx->state = KR_STATE_FAIL;
+		return ctx->state;
+	}
+
 	return ctx->state;
 }
 
@@ -85,14 +103,6 @@ int finish(kr_layer_t *ctx)
 	}
 
 	increment(address);
-
-	if (isblocked(address) == 1)
-	{
-		debugLog("\"%s\":\"%s\"", "message", "address blocked");
-
-		ctx->state = KR_STATE_FAIL;
-		return ctx->state;
-	}
 
 	return ctx->state;
 }
