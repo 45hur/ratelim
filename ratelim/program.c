@@ -39,7 +39,7 @@ int create(void **args)
 	if ((err = pthread_mutex_init(&(thread_shared->mutex), &shared)) != 0)
 		return err;
 
-	createVector(&statistics, 2);
+	createVector(&statistics, 1000);
 
 	pthread_t thr_id;
 	loop = 1;

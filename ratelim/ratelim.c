@@ -86,6 +86,39 @@ int begin(kr_layer_t *ctx)
 int consume(kr_layer_t *ctx, knot_pkt_t *pkt)
 {
 	debugLog("\"%s\":\"%s\"", "debug", "consume");
+	
+	struct kr_request *request = (struct kr_request *)ctx->req;
+	struct kr_rplan *rplan = &request->rplan;
+
+	char address[256] = { 0 };
+	int err = 0;
+
+	if ((err = getip(request, (char *)address)) != 0)
+	{
+		//return err; generates log message --- [priming] cannot resolve '.' NS, next priming query in 10 seconds
+		//we do not care about no address sources
+		debugLog("\"%s\":\"%s\",\"%s\":\"%x\"", "error", "consume", "getip", err);
+
+		return ctx->state;
+	}
+
+	int isblocked = 0;
+	if ((err = increment(address, &isblocked)) != 0)
+	{
+		debugLog("\"%s\":\"%s\",\"%s\":\"%x\"", "error", "consume", "increment", err);
+		return err;
+	}
+
+	if (isblocked == 1)
+	{
+		debugLog("\"%s\":\"%s\",\"%s\":\"%x\"", "debug", "consume", "isblocked", isblocked);
+
+		struct kr_query *qry = array_tail(rplan->pending);
+
+
+		return KR_STATE_FAIL;
+	}
+	
 
 	return ctx->state;
 }

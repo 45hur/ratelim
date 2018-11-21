@@ -48,7 +48,7 @@ int vectorAdd(crc64_vector **vector, const char *address)
 	if ((*vector)->count + 1 > (*vector)->capacity)
 	{
 		crc64_vector *newbuff = NULL;
-		if ((err = createVector(&newbuff, 2)) != 0)
+		if ((err = createVector(&newbuff, 1000)) != 0)
 		{
 			return err;
 		}
