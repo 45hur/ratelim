@@ -87,7 +87,11 @@ void* threadproc(void *arg)
 		{
 			debugLog("\"%s\":\"%s\"", "message", "stats reset");
 
+			pthread_mutex_lock(&(thread_shared->mutex));
+			
 			vectorReset(statistics);
+
+			pthread_mutex_unlock(&(thread_shared->mutex));
 		}
 		vectorPrint(statistics);
 
@@ -97,14 +101,22 @@ void* threadproc(void *arg)
 	return NULL;
 }
 
-int increment(char *address)
+int increment(char *address, int *isblocked)
 {
-	return vectorIncrement(&statistics, address);
-}
+	pthread_mutex_lock(&(thread_shared->mutex));
+	int err = 0;
+	if ((err = vectorIncrement(&statistics, address)) != 0)
+	{
+		*isblocked = 0;
+		return err;
+		pthread_mutex_unlock(&(thread_shared->mutex));
+	}
 
-int isblocked(char *address)
-{
-	return vectorIsItemBlocked(statistics, address);
+	*isblocked = vectorIsItemBlocked(statistics, address);
+
+	pthread_mutex_unlock(&(thread_shared->mutex));
+
+	return err;
 }
 
 #ifdef NOKRES 

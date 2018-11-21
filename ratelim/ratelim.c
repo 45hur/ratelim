@@ -51,7 +51,7 @@ int getip(struct kr_request *request, char *address)
 
 int begin(kr_layer_t *ctx)
 {
-	debugLog("\"%s\":\"%s\"", "message", "begin");
+	debugLog("\"%s\":\"%s\"", "debug", "begin");
 
 	struct kr_request *request = (struct kr_request *)ctx->req;
 	struct kr_rplan *rplan = &request->rplan;
@@ -62,15 +62,16 @@ int begin(kr_layer_t *ctx)
 	{
 		//return err; generates log message --- [priming] cannot resolve '.' NS, next priming query in 10 seconds
 		//we do not care about no address sources
+		debugLog("\"%s\":\"%s\",\"%s\":\"%x\"", "error", "begin", "getip", err);
+
 		return ctx->state;
 	}
 
-	if (isblocked(address) == 1)
+	int isblocked = 0;
+	if ((err = increment(address, &isblocked)) != 0)
 	{
-		debugLog("\"%s\":\"%s\"", "message", "address blocked");
-
-		ctx->state = KR_STATE_FAIL;
-		return ctx->state;
+		debugLog("\"%s\":\"%s\",\"%s\":\"%x\"", "error", "begin", "increment", err);
+		return err;
 	}
 
 	return ctx->state;
@@ -78,33 +79,21 @@ int begin(kr_layer_t *ctx)
 
 int consume(kr_layer_t *ctx, knot_pkt_t *pkt)
 {
-	debugLog("\"%s\":\"%s\"", "message", "consume");
+	debugLog("\"%s\":\"%s\"", "debug", "consume");
 
 	return ctx->state;
 }
 
 int produce(kr_layer_t *ctx, knot_pkt_t *pkt)
 {
-	debugLog("\"%s\":\"%s\"", "message", "produce");
+	debugLog("\"%s\":\"%s\"", "debug", "produce");
 
 	return ctx->state;
 }
 
 int finish(kr_layer_t *ctx)
 {
-	debugLog("\"%s\":\"%s\"", "message", "finish");
-
-	struct kr_request *request = (struct kr_request *)ctx->req;
-	struct kr_rplan *rplan = &request->rplan;
-	char address[256] = { 0 };
-	int err = 0;
-
-	if ((err = getip(request, (char *)address)) != 0)
-	{
-		return err;
-	}
-
-	increment(address);
+	debugLog("\"%s\":\"%s\"", "debug", "finish");
 
 	return ctx->state;
 }
@@ -130,7 +119,10 @@ int ratelim_init(struct kr_module *module)
 
 	void *args = NULL;
 	if ((err = create(&args)) != 0)
+	{
+		debugLog("\"%s\":\"%s\",\"%s\":\"%x\"", "error", "ratelim_init", "create", err);
 		return kr_error(err);
+	}
 
 	module->data = (void *)args;
 
@@ -142,7 +134,10 @@ int ratelim_deinit(struct kr_module *module)
 {
 	int err = 0;
 	if ((err = destroy((void *)module->data)) != 0)
+	{
+		debugLog("\"%s\":\"%s\",\"%s\":\"%x\"", "error", "ratelim_deinit", "destroy", err);
 		return kr_error(err);
+	}
 
 	return kr_ok();
 }

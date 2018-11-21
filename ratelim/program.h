@@ -8,5 +8,4 @@ int create(void **args);
 int destroy();
 
 void* threadproc(void *arg);
-int increment(char *address);
-int isblocked(char *address);
+int increment(char *address, int *isblocked);
