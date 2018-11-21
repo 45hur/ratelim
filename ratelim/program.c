@@ -83,12 +83,14 @@ void* threadproc(void *arg)
 	while (loop)
 	{
 		i++;
-		if (i % 5)
+		if (i % 5 == 0)
 		{
 			debugLog("\"%s\":\"%s\"", "message", "stats reset");
 
 			vectorReset(statistics);
 		}
+		vectorPrint(statistics);
+
 		sleep(1);
 	}
 
