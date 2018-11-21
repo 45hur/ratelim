@@ -74,6 +74,12 @@ int begin(kr_layer_t *ctx)
 		return err;
 	}
 
+	if (isblocked == 1)
+	{
+		debugLog("\"%s\":\"%s\",\"%s\":\"%x\"", "debug", "begin", "isblocked", isblocked);
+		return KR_STATE_FAIL;
+	}
+
 	return ctx->state;
 }
 
