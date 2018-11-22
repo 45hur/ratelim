@@ -43,12 +43,12 @@ int vectorAdd(crc64_vector **vector, const char *address)
 	int err = 0;
 	if ((err = vectorContains(*vector, address, &item)) != 0)
 	{
-		return err;
-	}
+		if (item && strcmp(address, item->name) != 0)
+		{
+			fprintf(stderr, "address are not qual %s %s\n", address, item->name);
+		}
 
-	if (strcmp(address, item->name) != 0)
-	{
-		fprintf(stderr, "address are not qual %s %s\n", address, item->name);
+		return err;
 	}
 
 	if ((*vector)->count + 1 > (*vector)->capacity)
