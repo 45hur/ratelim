@@ -16,7 +16,8 @@ int createVector(crc64_vector **vector, unsigned int capacity)
 		return -1;
 
 	(*vector) = (crc64_vector *)malloc(sizeof(crc64_vector));
-	(*vector)->items = (crc64_vector_item *)malloc(sizeof(crc64_vector_item) * capacity);
+	(*vector)->items = (crc64_vector_item *)calloc(capacity, sizeof(crc64_vector_item));
+
 	(*vector)->capacity = capacity;
 	(*vector)->count = 0;
 
@@ -204,7 +205,10 @@ int vectorPrint(crc64_vector *vector)
 
 	for (int i = 0; i < vector->count; i++)
 	{
-		fprintf(stdout, "%d.\t%s\t%llx\t%lld\n", i, vector->items[i].name, vector->items[i].checksum, vector->items[i].counter);
+		if (vector->items[i].counter != 0)
+		{
+			fprintf(stdout, "%d.\t%s\t%llx\t%lld\n", i, vector->items[i].name, vector->items[i].checksum, vector->items[i].counter);
+		}
 	}
 
 	return 0;
