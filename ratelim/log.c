@@ -19,6 +19,7 @@ void auditLog(const char *format, ...)
 	FILE *fh = 0;
 	char message[286] = { 0 };
 	char timebuf[30] = { 0 };
+	char filename[30] = { 0 };
 	time_t rawtime;
 	struct tm * timeinfo;
 
@@ -26,15 +27,16 @@ void auditLog(const char *format, ...)
 	timeinfo = localtime(&rawtime);
 	strftime(timebuf, 26, "%Y/%m/%d %H:%M:%S", timeinfo);
 	sprintf(message, "{\"timestamp\":\"%s\",%s}\n", timebuf, text);
+	sprintf(filename, C_MOD_LOGFILE, getpid());
 
 	fprintf(stdout, "%s", message);
 
 	if (fh == 0)
 	{
-		fh = fopen(C_MOD_LOGFILE, "at");
+		fh = fopen(filename, "at");
 		if (!fh)
 		{
-			fh = fopen(C_MOD_LOGFILE, "wt");
+			fh = fopen(filename, "wt");
 		}
 		if (!fh)
 		{
@@ -65,6 +67,7 @@ void debugLog(const char *format, ...)
 	FILE *fh = 0;
 	char message[286] = { 0 };
 	char timebuf[30] = { 0 };
+	char filename[30] = { 0 };
 	time_t rawtime;
 	struct tm * timeinfo;
 
@@ -72,15 +75,16 @@ void debugLog(const char *format, ...)
 	timeinfo = localtime(&rawtime);
 	strftime(timebuf, 26, "%Y/%m/%d %H:%M:%S", timeinfo);
 	sprintf(message, "{\"timestamp\":\"%s\",%s}\n", timebuf, text);
+	sprintf(filename, C_MOD_LOGDEBUGFILE, getpid());
 
 	fprintf(stdout, "%s", message);
 
 	if (fh == 0)
 	{
-		fh = fopen(C_MOD_LOGDEBUGFILE, "at");
+		fh = fopen(filename, "at");
 		if (!fh)
 		{
-			fh = fopen(C_MOD_LOGDEBUGFILE, "wt");
+			fh = fopen(filename, "wt");
 		}
 		if (!fh)
 		{
