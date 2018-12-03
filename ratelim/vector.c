@@ -9,6 +9,7 @@
 
 #include "crc64.h"
 #include "vector.h"
+#include "log.h"
 
 int createVector(crc64_vector **vector, unsigned int capacity)
 {

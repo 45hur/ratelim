@@ -7,9 +7,9 @@
 
 #include "thread_shared.h"
 
-#define C_MOD_MUTEX "mutex.ratelim.kres.module\0"
-#define C_MOD_LOGDEBUGFILE "/var/log/whalebone/ratelim_debug.%d.log\0"
-#define C_MOD_LOGFILE "/var/log/whalebone/ratelim.%d.log\0"
+#define C_MOD_MUTEX "mutex.ratelim.kres.module"
+#define C_MOD_LOGDEBUGFILE "/var/log/whalebone/ratelim_debug.%d.log"
+#define C_MOD_LOGFILE "/var/log/whalebone/ratelim.%d.log"
 
 void auditLog(const char *format, ...); 
 void debugLog(const char *format, ...);
