@@ -3,6 +3,7 @@
 #include "log.h"
 #include "program.h"
 #include "ratelim.h"
+#include "vector.h"
 
 #ifndef NOKRES
 
@@ -67,16 +68,21 @@ int begin(kr_layer_t *ctx)
 		return ctx->state;
 	}
 
-	int isblocked = 0;
-	if ((err = increment(address, &isblocked)) != 0)
+	int state = 0;
+	if ((err = increment(address, &state)) != 0)
 	{
 		debugLog("\"%s\":\"%s\",\"%s\":\"%x\"", "error", "begin", "increment", err);
 		return err;
 	}
 
-	if (isblocked == 1)
+	if (state == state_limited)
 	{
-		debugLog("\"%s\":\"%s\",\"%s\":\"%x\"", "debug", "begin", "isblocked", isblocked);
+		debugLog("\"%s\":\"%s\",\"%s\":\"%x\",\"%s\":\"%s\"", "debug", "begin", "state", state, "requested", "tcp");
+		request->current_query->flags.TCP = true;
+	} 
+	else if (state == state_quarantined)
+	{
+		debugLog("\"%s\":\"%s\",\"%s\":\"%x\"", "debug", "begin", "state", state);
 		return KR_STATE_FAIL;
 	}
 

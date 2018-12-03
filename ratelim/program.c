@@ -101,18 +101,18 @@ void* threadproc(void *arg)
 	return NULL;
 }
 
-int increment(char *address, int *isblocked)
+int increment(char *address, int *state)
 {
 	pthread_mutex_lock(&(thread_shared->mutex));
 	int err = 0;
 	if ((err = vectorIncrement(&statistics, address)) != 0)
 	{
-		*isblocked = 0;
-		return err;
-		pthread_mutex_unlock(&(thread_shared->mutex));
+		*state = state_none;
 	}
-
-	*isblocked = vectorIsItemBlocked(statistics, address);
+	else
+	{
+		*state = vectorIsItemBlocked(statistics, address);
+	}
 
 	pthread_mutex_unlock(&(thread_shared->mutex));
 

@@ -196,13 +196,10 @@ int vectorIsItemBlocked(crc64_vector *vector, char *address)
 	crc64_vector_item *item = NULL;
 	if (vectorContains(vector, address, &item))
 	{
-		if (item->counter > MAX_NUM_REQUESTS)
-		{
-			return 1;
-		}
+		return item->state;
 	}
 
-	return 0;
+	return state_none;
 }
 
 int vectorPrint(crc64_vector *vector)
