@@ -195,7 +195,7 @@ int vectorIsItemBlocked(crc64_vector *vector, char *address)
 	crc64_vector_item *item = NULL;
 	if (vectorContains(vector, address, &item))
 	{
-		if (item->counter > 5)
+		if (item->counter > MAX_NUM_REQUESTS)
 		{
 			return 1;
 		}
@@ -223,13 +223,42 @@ int vectorReset(crc64_vector *vector)
 {
 	for (int i = 0; i < vector->count; i++)
 	{
-		if (vector->items[i].counter < 5)
+		if (vector->items[i].counter < MAX_NUM_REQUESTS)
 		{
+			if (vector->items[i].state != state_none)
+			{
+				debugLog("\"%s\"=\"%s\",\"%s\"=\"%s\",\"%s\"=\"%s\"", "type", "state_change", "ip", vector->items[i].name, "state", "none");
+				auditLog("\"%s\"=\"%s\",\"%s\"=\"%s\",\"%s\"=\"%s\"", "type", "state_change", "ip", vector->items[i].name, "state", "none");
+			}
+			vector->items[i].state = state_none;
 			vector->items[i].counter = 0;
 		}
 		else
 		{
-			vector->items[i].counter--;
+			if (vector->items[i].counter >= MAX_NUM_REQUESTS * 2)
+			{
+				if (vector->items[i].state != state_quarantined)
+				{
+					debugLog("\"%s\"=\"%s\",\"%s\"=\"%s\",\"%s\"=\"%s\"", "type", "state_change", "ip", vector->items[i].name, "state", "quarantined");
+					auditLog("\"%s\"=\"%s\",\"%s\"=\"%s\",\"%s\"=\"%s\"", "type", "state_change", "ip", vector->items[i].name, "state", "quarantined");
+					
+					vector->items[i].state = state_quarantined;
+				}
+
+				vector->items[i].counter = MAX_NUM_REQUESTS * 2;
+			}
+			else
+			{
+				if (vector->items[i].state != state_limited)
+				{
+					debugLog("\"%s\"=\"%s\",\"%s\"=\"%s\",\"%s\"=\"%s\"", "type", "state_change", "ip", vector->items[i].name, "state", "limited");
+					auditLog("\"%s\"=\"%s\",\"%s\"=\"%s\",\"%s\"=\"%s\"", "type", "state_change", "ip", vector->items[i].name, "state", "limited");
+
+					vector->items[i].state = state_limited;
+				}
+
+				vector->items[i].counter--;
+			}
 		}
 	}
 

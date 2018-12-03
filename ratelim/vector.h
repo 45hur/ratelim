@@ -1,7 +1,16 @@
 #pragma once
 
+#define MAX_NUM_REQUESTS 1000
+
+enum {
+	state_none = 0,
+	state_limited = 1,
+	state_quarantined = 2
+} state_enum;
+
 typedef struct
 {
+	unsigned int state;
 	unsigned long long checksum;
 	unsigned long long counter;
 	char name[17];
